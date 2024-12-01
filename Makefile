@@ -10,7 +10,7 @@ LIST_OF_IMPLS := ${addsuffix ),$(LIST_OF_IMPLS_PREFIX)}
 
 # flags
 CXX := clang++
-CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
+CXXFLAGS := -std=c++20 -O2 -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
 
 aoc24: main.cpp $(SRCS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
