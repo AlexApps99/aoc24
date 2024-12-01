@@ -1,4 +1,7 @@
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -6,19 +9,19 @@
 void aoc_01(std::istream &in, std::ostream &out1, std::ostream &out2) {
     // generate heaps for each input,
     // then sort em
-    std::vector<unsigned long> heap_a{};
-    std::vector<unsigned long> heap_b{};
+    std::vector<uint64_t> heap_a{};
+    std::vector<uint64_t> heap_b{};
 
     // parse input by line
     std::string line;
     while (std::getline(in, line)) {
         // find position of whitespace
-        std::size_t whitespace_pos = line.find(" ");
+        const std::size_t whitespace_pos = line.find(' ');
 
         // split by whitespace
-        unsigned long a =
+        const uint64_t a =
             std::strtoul(line.substr(0, whitespace_pos).c_str(), nullptr, 10);
-        unsigned long b =
+        const uint64_t b =
             std::strtoul(line.substr(whitespace_pos + 1).c_str(), nullptr, 10);
 
         // chuck onto heaps
@@ -30,39 +33,42 @@ void aoc_01(std::istream &in, std::ostream &out1, std::ostream &out2) {
     }
 
     // get difference of each pair in heaps
-    unsigned long total_dist = 0;
+    uint64_t total_dist = 0;
 
-    unsigned int idx = heap_a.size();
+    size_t idx = heap_a.size();
     while (idx > 0) {
         // pop the max value from each heap and stick it at the end
         // (when done, the heaps will be sorted in ascending order)
+        // NOLINTBEGIN(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
         std::pop_heap(heap_a.begin(), heap_a.begin() + idx);
         std::pop_heap(heap_b.begin(), heap_b.begin() + idx);
+        // NOLINTEND(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
 
         idx -= 1;
 
         // get the difference between the two values
-        unsigned long a = heap_a[idx];
-        unsigned long b = heap_b[idx];
+        const uint64_t a = heap_a[idx];
+        const uint64_t b = heap_b[idx];
 
-        total_dist += std::abs((long)a - (long)b);
+        total_dist +=
+            std::abs(static_cast<int64_t>(a) - static_cast<int64_t>(b));
     }
 
     // output the total distance
-    out1 << total_dist << std::endl;
+    out1 << total_dist << '\n';
 
     // part 2
-    unsigned long sum = 0;
+    uint64_t sum = 0;
 
-    unsigned int idx_left = 0;
-    unsigned int idx_right = 0;
+    size_t idx_left = 0;
+    size_t idx_right = 0;
 
     // this counts RHS occurences of LHS values.
     // as the heaps are sorted, we can just iterate through them
     // in similar vibes to merge sort's merge step
     while (idx_left < heap_a.size()) {
-        unsigned long left_val = heap_a[idx_left];
-        unsigned long occurences = 0;
+        const uint64_t left_val = heap_a[idx_left];
+        uint64_t occurences = 0;
         while (idx_right < heap_b.size() && heap_b[idx_right] <= left_val) {
             if (heap_b[idx_right] == left_val) {
                 occurences += 1;
@@ -70,7 +76,7 @@ void aoc_01(std::istream &in, std::ostream &out1, std::ostream &out2) {
             idx_right += 1;
         }
 
-        unsigned long occurences_of_left_val = 0;
+        uint64_t occurences_of_left_val = 0;
         while (idx_left < heap_a.size() && heap_a[idx_left] == left_val) {
             idx_left += 1;
             occurences_of_left_val += 1;
@@ -79,5 +85,5 @@ void aoc_01(std::istream &in, std::ostream &out1, std::ostream &out2) {
         sum += occurences * left_val * occurences_of_left_val;
     }
 
-    out2 << sum << std::endl;
+    out2 << sum << '\n';
 }

@@ -8,13 +8,17 @@ SRCS := main.cpp $(DAYS_SRCS)
 LIST_OF_IMPLS_PREFIX := ${addprefix X(,$(DAYS)}
 LIST_OF_IMPLS := ${addsuffix ),$(LIST_OF_IMPLS_PREFIX)}
 
+# flags
+CXX := clang++
+CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
+
 aoc24: main.cpp $(SRCS)
-	$(CXX) -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)" -O2 -g -Wall -Wextra -Wpedantic -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-.PHONY: test clean
+.PHONY: tidy clean
 
-test:
-
+tidy:
+	clang-tidy $(SRCS) -- $(CXXFLAGS)
 
 clean:
 	rm -f aoc24
