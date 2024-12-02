@@ -14,19 +14,20 @@ constexpr std::ios_base::openmode OUT_MODE =
 
 constexpr std::ios_base::openmode IN_MODE = std::ios::in | std::ios::binary;
 
+// see the wikipedia page for X-macros (you will either love it or hate it)
 #ifndef LIST_OF_IMPLS
 #define LIST_OF_IMPLS X(01)
 #endif
 
 #define X(id)                                                                  \
-    void aoc_##id(std::istream &in, std::ostream &out1, std::ostream &out2);
+    void aoc_##id(std::istream &in, std::string &out1, std::string &out2);
 
 LIST_OF_IMPLS
 
 #undef X
 
 // typedef of above function signature:
-using aoc_func = void(std::istream &in, std::ostream &out1, std::ostream &out2);
+using aoc_func = void(std::istream &in, std::string &out1, std::string &out2);
 
 std::optional<std::reference_wrapper<aoc_func>> get_aoc_func(uint64_t day) {
     // create switch-case for all days
@@ -85,7 +86,11 @@ int test(const std::string &day_str, aoc_func &func,
     std::stringbuf out2_buffer;
     std::ostream out2{&out2_buffer}; // NOLINT(misc-const-correctness)
 
-    func(in, out1, out2);
+    std::string out1_str;
+    std::string out2_str;
+    func(in, out1_str, out2_str);
+    out1 << out1_str << '\n';
+    out2 << out2_str << '\n';
 
     // grab expected output files as strings
     const std::string expected_output_file1 =
@@ -133,9 +138,10 @@ int main(int argc, char *argv[]) {
 
     // grab the day being run
     const uint64_t day = strtoul(argv[1], nullptr, 10);
-    std::optional<std::reference_wrapper<aoc_func>> func = get_aoc_func(day);
+    std::optional<std::reference_wrapper<aoc_func>> func_opt =
+        get_aoc_func(day);
 
-    if (!func) {
+    if (!func_opt) {
         std::cerr << "Invalid day specified." << '\n';
         return EXIT_FAILURE;
     }
@@ -208,17 +214,21 @@ int main(int argc, char *argv[]) {
     // NOLINTEND(misc-const-correctness)
 
     if (run_test) {
-        const int example_ret = test(day_str, func.value(), "example.");
+        const int example_ret = test(day_str, func_opt.value(), "example.");
         if (example_ret != EXIT_SUCCESS) {
             return example_ret;
         }
-        const int input_ret = test(day_str, func.value(), "");
+        const int input_ret = test(day_str, func_opt.value(), "");
         if (input_ret != EXIT_SUCCESS) {
             return input_ret;
         }
     } else {
-        aoc_func &f = func.value();
-        f(in, out1, out2);
+        aoc_func &func = func_opt.value();
+        std::string out1_str;
+        std::string out2_str;
+        func(in, out1_str, out2_str);
+        out1 << out1_str << '\n';
+        out2 << out2_str << '\n';
         return EXIT_SUCCESS;
     }
 }

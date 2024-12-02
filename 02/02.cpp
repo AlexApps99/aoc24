@@ -1,87 +1,76 @@
-#include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
 
-bool is_report_safe(std::vector<uint64_t> report, bool skip_one) {
-    // slow but not messy :)
-    // starts with OOB idx (so nothing skipped)
-    size_t loop_bound = skip_one ? 0 : report.size();
-    for (size_t skip_idx = report.size(); skip_idx >= loop_bound; skip_idx--) {
-        bool is_this_one_good = true;
-        int8_t delta_mul_fac = 0;
-
-        // sentinel if nothing seen yet
-        uint64_t prev_num = UINT64_MAX;
-
-        for (size_t i = 0; i < report.size(); i++) {
-            if (i == skip_idx) {
-                continue;
-            }
-
-            uint64_t num = report[i];
-
-            if (prev_num != UINT64_MAX) {
-                int64_t delta = (static_cast<int64_t>(num) -
-                                 static_cast<int64_t>(prev_num));
-                if (delta_mul_fac == 0) {
-                    delta_mul_fac = delta < 0 ? -1 : 1;
-                }
-                delta *= delta_mul_fac;
-
-                if (delta < 1 || delta > 3) {
-                    is_this_one_good = false;
-                    break;
-                }
-            }
-
-            prev_num = num;
-        }
-
-        if (is_this_one_good) {
-            return true;
-        }
-
-        // bruh this code is not great
-        if (skip_idx == 0) {
-            break;
-        }
-    }
-
-    return false;
-}
-
-void aoc_02(std::istream &in, std::ostream &out1, std::ostream &out2) {
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void aoc_02(std::istream &in, std::string &out1, std::string &out2) {
     uint32_t counter_1 = 0;
     uint32_t counter_2 = 0;
 
     std::string line;
     while (std::getline(in, line)) {
+        // grab the numbers within this report line
         std::stringstream ss(line);
-        std::string num_str;
+        const std::vector<int16_t> report{std::istream_iterator<int16_t>(ss),
+                                          {}};
 
-        std::vector<uint64_t> report{};
+        // go through all the choices of value to skip
+        // (starting out of bounds, AKA no value is skipped)
+        for (size_t skip_idx = report.size() + 1; skip_idx-- > 0;) {
+            const bool nothing_skipped = skip_idx == report.size();
 
-        while (std::getline(ss, num_str, ' ')) {
-            const uint64_t num = std::strtoul(num_str.c_str(), nullptr, 10);
+            // sentinel until initialized with observed direction
+            int16_t sign_correction_factor = 0;
+            // negative sentinel if nothing seen yet
+            int16_t prev_num = -1;
 
-            report.push_back(num);
-        }
+            // should be set if a bad level is found
+            bool no_bad_levels_seen = true;
 
-        if (is_report_safe(report, false)) {
-            counter_1++;
-        }
+            // go through each element in the report
+            for (size_t i = 0; i < report.size(); i++) {
+                if (i == skip_idx) {
+                    // this value is being skipped
+                    continue;
+                }
 
-        if (is_report_safe(report, true)) {
-            counter_2++;
+                if (prev_num >= 0) {
+                    // get difference between consecutive numbers
+                    int16_t delta = report[i] - prev_num;
+                    if (sign_correction_factor == 0) {
+                        // init negative direction factor if sequence decreases
+                        sign_correction_factor = delta < 0 ? -1 : 1;
+                    }
+                    // correct sign based on initial direction
+                    delta *= sign_correction_factor;
+
+                    // check if direction is good
+                    if (delta < 1 || delta > 3) {
+                        no_bad_levels_seen = false;
+                        break;
+                    }
+                }
+
+                // store previous number seen
+                prev_num = report[i];
+            }
+
+            // sweet!
+            if (no_bad_levels_seen) {
+                if (nothing_skipped) {
+                    counter_1++;
+                }
+                counter_2++;
+                break;
+            }
         }
     }
 
-    out1 << counter_1 << '\n';
-    out2 << counter_2 << '\n';
+    // output results
+    out1 = std::to_string(counter_1);
+    out2 = std::to_string(counter_2);
 }

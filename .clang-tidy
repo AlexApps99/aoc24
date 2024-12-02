@@ -1,4 +1,4 @@
 ---
-Checks:          'bugprone-*,cert-*,clang-diagnostic-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,google-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-modernize-use-trailing-return-type,-cppcoreguidelines-macro-usage'
+Checks:          'bugprone-*,cert-*,clang-diagnostic-*,clang-analyzer-*,concurrency-*,cppcoreguidelines-*,google-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-modernize-use-trailing-return-type,-cppcoreguidelines-macro-usage,-bugprone-narrowing-conversions,-cppcoreguidelines-narrowing-conversions,-hicpp-use-auto,-modernize-use-auto,-misc-const-correctness'
 FormatStyle:     file
 ...
