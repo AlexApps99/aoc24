@@ -1,3 +1,4 @@
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
@@ -8,6 +9,15 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
+
+// aoc24 gen 01 <- optional example <- optional
+// aoc24 test 01 <- optional example <- optional
+// aoc24 run 01 - - <- optional
+
+// move to more general format of examples (3 had two different examples, for
+// example)
 
 constexpr std::ios_base::openmode OUT_MODE =
     std::ios::out | std::ios::trunc | std::ios::binary;
@@ -29,7 +39,8 @@ LIST_OF_IMPLS
 // typedef of above function signature:
 using aoc_func = void(std::istream &in, std::string &out1, std::string &out2);
 
-std::optional<std::reference_wrapper<aoc_func>> get_aoc_func(uint64_t day) {
+std::optional<std::reference_wrapper<aoc_func>>
+get_aoc_func(const uint64_t day) {
     // create switch-case for all days
 #define X(id)                                                                  \
     case id:                                                                   \
@@ -47,20 +58,19 @@ std::optional<std::reference_wrapper<aoc_func>> get_aoc_func(uint64_t day) {
 // check if the computed output matches the groundtruth,
 // return EXIT_SUCCESS if it does, EXIT_FAILURE otherwise.
 // if they don't match, print both to stderr.
-int test_part(const std::string &name, std::stringbuf &computed,
-              std::ifstream &groundtruth) {
+int test_part(const std::string &name, const std::string &computed_str,
+              const std::string &groundtruth_str) {
 
-    std::stringstream groundtruth_buffer;
-    groundtruth_buffer << groundtruth.rdbuf();
+    bool test_passed = computed_str == groundtruth_str ||
+                       computed_str + '\n' == groundtruth_str;
 
-    const std::string groundtruth_str = groundtruth_buffer.str();
-    const std::string computed_str = computed.str();
-
-    if (computed_str != groundtruth_str) {
-        std::cerr << name << " failed." << '\n'
-                  << "Computed: " << '\n'
+    if (test_passed) {
+        std::cerr << "✅ " << name << "\n";
+    } else {
+        std::cerr << "❌ " << name << " failed.\n"
+                  << "Computed:\n"
                   << computed_str << '\n'
-                  << "Expected: " << '\n'
+                  << "Expected:\n"
                   << groundtruth_str << '\n';
         return EXIT_FAILURE;
     }
@@ -68,11 +78,17 @@ int test_part(const std::string &name, std::stringbuf &computed,
     return EXIT_SUCCESS;
 }
 
-int test(const std::string &day_str, aoc_func &func,
-         const std::string &prefix) {
+int test(const std::string &day_str, aoc_func &func, const std::string &prefix,
+         const bool gen_files) {
     // get string of day padded to 2 digits
 
-    const std::string input_file = day_str + "/" + prefix + "input.txt";
+    const std::string path_with_prefix =
+        day_str + "/" + prefix + (prefix.empty() ? "" : ".");
+
+    const std::string input_file = path_with_prefix + "input.txt";
+    const std::string expected_output1_file = path_with_prefix + "output1.txt";
+    const std::string expected_output2_file = path_with_prefix + "output2.txt";
+
     std::ifstream in{input_file, IN_MODE};
 
     if (!in.is_open()) {
@@ -80,44 +96,84 @@ int test(const std::string &day_str, aoc_func &func,
         return EXIT_FAILURE;
     }
 
-    std::stringbuf out1_buffer;
-    std::ostream out1{&out1_buffer}; // NOLINT(misc-const-correctness)
-
-    std::stringbuf out2_buffer;
-    std::ostream out2{&out2_buffer}; // NOLINT(misc-const-correctness)
-
     std::string out1_str;
     std::string out2_str;
     func(in, out1_str, out2_str);
-    out1 << out1_str << '\n';
-    out2 << out2_str << '\n';
 
-    // grab expected output files as strings
-    const std::string expected_output_file1 =
-        day_str + "/" + prefix + "output1.txt";
-    std::ifstream expected1{expected_output_file1, IN_MODE};
+    if (gen_files) {
+        std::ofstream expected1{expected_output1_file, OUT_MODE};
 
-    if (!expected1.is_open()) {
-        std::cerr << "Error opening file: " << expected_output_file1 << '\n';
-        return EXIT_FAILURE;
+        if (!expected1.is_open()) {
+            std::cerr << "Error opening file: " << expected_output1_file
+                      << '\n';
+            return EXIT_FAILURE;
+        }
+
+        expected1 << out1_str << '\n';
+
+        std::ofstream expected2{expected_output2_file, OUT_MODE};
+
+        if (!expected2.is_open()) {
+            std::cerr << "Error opening file: " << expected_output2_file
+                      << '\n';
+            return EXIT_FAILURE;
+        }
+
+        expected2 << out2_str << '\n';
+    } else {
+        std::ifstream expected1{expected_output1_file, IN_MODE};
+
+        if (!expected1.is_open()) {
+            std::cerr << "Error opening file: " << expected_output1_file
+                      << '\n';
+            return EXIT_FAILURE;
+        }
+
+        std::stringstream expected1_ss;
+        expected1_ss << expected1.rdbuf();
+        const std::string expected1_str = expected1_ss.str();
+
+        std::ifstream expected2{expected_output2_file, IN_MODE};
+
+        if (!expected2.is_open()) {
+            std::cerr << "Error opening file: " << expected_output2_file
+                      << '\n';
+            return EXIT_FAILURE;
+        }
+
+        std::stringstream expected2_ss;
+        expected2_ss << expected2.rdbuf();
+        const std::string expected2_str = expected2_ss.str();
+
+        const int ret1 = test_part(day_str + "/1", out1_str, expected1_str);
+        if (ret1 != EXIT_SUCCESS) {
+            return ret1;
+        }
+
+        const int ret2 = test_part(day_str + "/2", out2_str, expected2_str);
+        if (ret2 != EXIT_SUCCESS) {
+            return ret2;
+        }
     }
 
-    const std::string expected_output_file2 =
-        day_str + "/" + prefix + "output2.txt";
-    std::ifstream expected2{expected_output_file2, IN_MODE};
+    return EXIT_SUCCESS;
+}
 
-    if (!expected2.is_open()) {
-        std::cerr << "Error opening file: " << expected_output_file2 << '\n';
-        return EXIT_FAILURE;
-    }
+int run(aoc_func &func, std::optional<std::array<std::ofstream, 2>> &outputs) {
+    std::string out1_str;
+    std::string out2_str;
+    func(std::cin, out1_str, out2_str);
 
-    const int ret1 = test_part(day_str + " (part 1)", out1_buffer, expected1);
-    if (ret1 != EXIT_SUCCESS) {
-        return ret1;
-    }
-    const int ret2 = test_part(day_str + " (part 2)", out2_buffer, expected2);
-    if (ret2 != EXIT_SUCCESS) {
-        return ret2;
+    if (outputs) {
+        std::ostream &out1 = outputs.value()[0];
+        std::ostream &out2 = outputs.value()[1];
+        out1 << out1_str << '\n';
+        out2 << out2_str << '\n';
+    } else {
+        // pretty-print for console
+        std::cout << "# Part 1:\n"
+                  << out1_str << "\n\n# Part 2:\n"
+                  << out2_str << '\n';
     }
 
     return EXIT_SUCCESS;
@@ -129,106 +185,108 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<std::ofstream> out1_file{};
     std::unique_ptr<std::ofstream> out2_file{};
 
-    bool run_test = false;
+    if (argc >= 2) {
+        const std::string run_mode{argv[1]};
+        if (run_mode == "run") {
+            if (argc == 3 || argc == 5) {
+                const uint64_t day = strtoul(argv[2], nullptr, 10);
+                std::optional<std::reference_wrapper<aoc_func>> func_opt =
+                    get_aoc_func(day);
+                if (func_opt) {
+                    std::optional<std::array<std::ofstream, 2>> outputs{
+                        std::nullopt};
+                    if (argc == 5) {
+                        std::string out1_file{argv[3]};
+                        std::string out2_file{argv[4]};
+                        std::ofstream out1{argv[3], OUT_MODE};
+                        std::ofstream out2{argv[4], OUT_MODE};
+                        if (!out1.is_open()) {
+                            std::cerr
+                                << "Error opening output file: " << out1_file
+                                << '\n';
+                            return EXIT_FAILURE;
+                        }
+                        if (!out2.is_open()) {
+                            std::cerr
+                                << "Error opening output file: " << out2_file
+                                << '\n';
+                            return EXIT_FAILURE;
+                        }
+                        std::array<std::ofstream, 2> files = {std::move(out1),
+                                                              std::move(out2)};
 
-    if (argc < 2 || argc > 4) {
-        std::cerr << "Example usage: aoc24 01 << 01.txt >> 01.txt" << '\n';
-        return EXIT_FAILURE;
-    }
+                        outputs.emplace(std::move(files));
+                    }
+                    return run(func_opt.value(), outputs);
+                }
+            }
 
-    // grab the day being run
-    const uint64_t day = strtoul(argv[1], nullptr, 10);
-    std::optional<std::reference_wrapper<aoc_func>> func_opt =
-        get_aoc_func(day);
-
-    if (!func_opt) {
-        std::cerr << "Invalid day specified." << '\n';
-        return EXIT_FAILURE;
-    }
-
-    std::stringstream ss;
-    ss << std::setw(2) << std::setfill('0') << day;
-    const std::string day_str = ss.str();
-
-    // make sure right number of args are passed in
-    if (argc == 2) {
-        // do nothing, use default streams
-    } else if (argc == 3) {
-        std::optional<std::string> run_prefix{};
-        const std::string run_mode{argv[2]};
-        if (run_mode == "test") {
-            run_test = true;
-        } else if (run_mode == "run") {
-            run_prefix = "";
-        } else if (run_mode == "example") {
-            run_prefix = "example.";
-        } else {
-            std::cerr << "Invalid mode specified." << '\n';
+            std::cerr << "Example usage: `aoc24 run 01`, "
+                         "`aoc24 run 01 out1.txt out2.txt`\n";
             return EXIT_FAILURE;
         }
 
-        if (run_prefix) {
-            const std::string input_file =
-                day_str + "/" + run_prefix.value() + "input.txt";
-            const std::string output_file1 =
-                day_str + "/" + run_prefix.value() + "output1.txt";
-            const std::string output_file2 =
-                day_str + "/" + run_prefix.value() + "output2.txt";
+        if (run_mode == "test" || run_mode == "gen") {
+            bool is_gen = run_mode == "gen";
+            if (argc == 2) {
+#define X(id)                                                                  \
+    {                                                                          \
+        int ret = test(#id, aoc_##id, "example", is_gen);                      \
+        if (ret != EXIT_SUCCESS) {                                             \
+            return ret;                                                        \
+        }                                                                      \
+        ret = test(#id, aoc_##id, "", is_gen);                                 \
+        if (ret != EXIT_SUCCESS) {                                             \
+            return ret;                                                        \
+        }                                                                      \
+    }
 
-            in_file = std::make_unique<std::ifstream>(input_file, IN_MODE);
-            out1_file = std::make_unique<std::ofstream>(output_file1, OUT_MODE);
-            out2_file = std::make_unique<std::ofstream>(output_file2, OUT_MODE);
-        }
-    } else if (argc == 4) {
-        // open files for writing, if "-" is passed in, use default
-        // streams
-        const std::string a2{argv[2]};
-        const std::string a3{argv[3]};
-        if (!a2.empty() && a2 != "-") {
-            out1_file = std::make_unique<std::ofstream>(a2, OUT_MODE);
-        }
-        if (!a3.empty() && a3 != "-") {
-            out2_file = std::make_unique<std::ofstream>(a3, OUT_MODE);
+                LIST_OF_IMPLS
+
+#undef X
+                return EXIT_SUCCESS;
+            }
+
+            if (argc == 3 || argc == 4) {
+                const uint64_t day = std::strtoul(argv[2], nullptr, 10);
+
+                std::stringstream ss;
+                ss << std::setw(2) << std::setfill('0') << day;
+                const std::string day_str = ss.str();
+
+                std::optional<std::reference_wrapper<aoc_func>> func_opt =
+                    get_aoc_func(day);
+                if (func_opt) {
+                    std::vector<std::string> prefixes{"example", ""};
+
+                    if (argc == 4) {
+                        prefixes.clear();
+                        std::string arg_prefix = argv[3];
+                        if (arg_prefix == "game") {
+                            prefixes.emplace_back("");
+                        } else {
+                            prefixes.emplace_back(std::move(arg_prefix));
+                        }
+                    }
+
+                    for (const std::string &prefix : prefixes) {
+                        const int ret =
+                            test(day_str, func_opt.value(), prefix, is_gen);
+                        if (ret != EXIT_SUCCESS) {
+                            return ret;
+                        }
+                    }
+                    return EXIT_SUCCESS;
+                }
+            }
+
+            std::cerr << "Example usage: `aoc24 test`, "
+                         "`aoc24 test 01`, "
+                         "`aoc24 test 01 example`\n";
+            return EXIT_FAILURE;
         }
     }
 
-    if (in_file && !in_file->is_open()) {
-        std::cerr << "Error opening input file." << '\n';
-        return EXIT_FAILURE;
-    }
-
-    if (out1_file && !out1_file->is_open()) {
-        std::cerr << "Error opening output1 file." << '\n';
-        return EXIT_FAILURE;
-    }
-
-    if (out2_file && !out2_file->is_open()) {
-        std::cerr << "Error opening output2 file." << '\n';
-        return EXIT_FAILURE;
-    }
-
-    // NOLINTBEGIN(misc-const-correctness)
-    std::istream &in = in_file ? *in_file : std::cin;
-    std::ostream &out1 = out1_file ? *out1_file : std::cout;
-    std::ostream &out2 = out2_file ? *out2_file : std::cout;
-    // NOLINTEND(misc-const-correctness)
-
-    if (run_test) {
-        const int example_ret = test(day_str, func_opt.value(), "example.");
-        if (example_ret != EXIT_SUCCESS) {
-            return example_ret;
-        }
-        const int input_ret = test(day_str, func_opt.value(), "");
-        if (input_ret != EXIT_SUCCESS) {
-            return input_ret;
-        }
-    } else {
-        aoc_func &func = func_opt.value();
-        std::string out1_str;
-        std::string out2_str;
-        func(in, out1_str, out2_str);
-        out1 << out1_str << '\n';
-        out2 << out2_str << '\n';
-        return EXIT_SUCCESS;
-    }
+    std::cerr << "Example usage: `aoc24 [ run | test | gen]`\n";
+    return EXIT_FAILURE;
 }
