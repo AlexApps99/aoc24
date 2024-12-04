@@ -42,11 +42,18 @@ using aoc_func = void(std::istream &in, std::string &out1, std::string &out2);
 std::optional<std::reference_wrapper<aoc_func>>
 get_aoc_func(const uint64_t day) {
     // create switch-case for all days
+
+    if (day > 99) {
+        return std::nullopt;
+    }
+
+    // (hack is to avoid octal repr - "id" must have leading digit e.g. 01)
+    // 10**8 chosen as 10**8 & 0xFF == 00
 #define X(id)                                                                  \
-    case id:                                                                   \
+    case 100'000'0##id:                                                        \
         return std::ref(aoc_##id);
 
-    switch (day) {
+    switch (100'000'000 | day) {
         LIST_OF_IMPLS
     default:
         return std::nullopt;
