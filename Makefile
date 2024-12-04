@@ -26,4 +26,4 @@ tidy:
 	clang-tidy $(SRCS) -- $(CXXFLAGS)
 
 clean:
-	rm -f aoc24 *.o
+	rm -f aoc24 $(SRCS:.cpp=.o)
