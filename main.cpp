@@ -152,12 +152,22 @@ int test(const std::string &day_str, aoc_func &func, const std::string &prefix,
         expected2_ss << expected2.rdbuf();
         const std::string expected2_str = expected2_ss.str();
 
-        const int ret1 = test_part(day_str + "/1", out1_str, expected1_str);
+        std::string shorthand_prefix = " (" + prefix + ")";
+
+        if (prefix.empty()) {
+            shorthand_prefix = "";
+        } else if (prefix == "example") {
+            shorthand_prefix = "e";
+        }
+
+        const int ret1 = test_part(day_str + "/1" + shorthand_prefix, out1_str,
+                                   expected1_str);
         if (ret1 != EXIT_SUCCESS) {
             return ret1;
         }
 
-        const int ret2 = test_part(day_str + "/2", out2_str, expected2_str);
+        const int ret2 = test_part(day_str + "/2" + shorthand_prefix, out2_str,
+                                   expected2_str);
         if (ret2 != EXIT_SUCCESS) {
             return ret2;
         }
