@@ -12,7 +12,12 @@ LIST_OF_IMPLS := ${addsuffix ),$(LIST_OF_IMPLS_PREFIX)}
 CXX := clang++
 CXXFLAGS := -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
 
-aoc24: main.cpp $(SRCS)
+# object files
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+# buuld from .o
+aoc24: $(SRCS:.cpp=.o)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 .PHONY: tidy clean
@@ -21,4 +26,4 @@ tidy:
 	clang-tidy $(SRCS) -- $(CXXFLAGS)
 
 clean:
-	rm -f aoc24
+	rm -f aoc24 *.o
