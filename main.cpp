@@ -50,10 +50,10 @@ get_aoc_func(const uint64_t day) {
     // (hack is to avoid octal repr - "id" must have leading digit e.g. 01)
     // 10**8 chosen as 10**8 & 0xFF == 00
 #define X(id)                                                                  \
-    case 100'000'0##id:                                                        \
+    case 100'000'0##id##UL:                                                    \
         return std::ref(aoc_##id);
 
-    switch (100'000'000 | day) {
+    switch (100'000'000UL | day) {
         LIST_OF_IMPLS
     default:
         return std::nullopt;
