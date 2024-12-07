@@ -49,9 +49,9 @@ Dir turn_right(Dir dir) {
 }
 
 // returns false if a loop was found
-bool step_to_end(std::vector<std::string> puzzle, int guard_x, int guard_y,
-                 Dir guard_dir, uint32_t &count1, uint32_t &count2,
-                 bool is_main_traversal) {
+bool step_to_end(std::vector<std::string> puzzle, int32_t guard_x,
+                 int32_t guard_y, Dir guard_dir, uint32_t &count1,
+                 uint32_t &count2, bool is_main_traversal) {
     std::vector<std::vector<uint8_t>> visited;
     for (const auto &row : puzzle) {
         visited.push_back(std::vector<uint8_t>(row.size(), 0));
@@ -128,8 +128,8 @@ void aoc_06(std::istream &in, std::string &out1, std::string &out2) {
     int32_t guard_y = 0;
     Dir guard_dir = Dir::R;
 
-    for (int i = 0; i < puzzle.size(); i++) {
-        for (int j = 0; j < puzzle[i].size(); j++) {
+    for (int32_t i = 0; i < puzzle.size(); i++) {
+        for (int32_t j = 0; j < puzzle[i].size(); j++) {
             std::optional<Dir> dir = get_dir(puzzle[i][j]);
             if (dir.has_value()) {
                 guard_x = j;
