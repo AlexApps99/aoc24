@@ -104,20 +104,15 @@ void aoc_09(std::istream &in, std::string &out1, std::string &out2) {
     uint64_t pos = 0;
     while (link) {
         if (link->is_free_space()) {
-            for (uint64_t j = 0; j < link->size; j++) {
-                std::cerr << ".";
-            }
             pos += link->size;
         } else {
             for (uint64_t j = 0; j < link->size; j++) {
-                std::cerr << link->id;
                 count2 += pos * link->id;
                 pos += 1;
             }
         }
         link = link->next;
     }
-    std::cerr << '\n';
 
     for (uint64_t i = 0; i < blocks.size(); i++) {
         if (blocks[i] != UINT64_MAX) {

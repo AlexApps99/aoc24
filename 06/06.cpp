@@ -95,7 +95,6 @@ bool step_to_end(std::vector<std::string> puzzle, int32_t guard_x,
                 visited[new_y][new_x] |= obstacle_placed;
                 if (!step_to_end(puzzle_copy, guard_x, guard_y, guard_dir,
                                  count1, count2, false)) {
-                    std::cerr << new_x << " " << new_y << '\n';
                     // loop detected
                     count2++;
                 }
