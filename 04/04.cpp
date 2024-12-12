@@ -6,20 +6,21 @@
 #include <string>
 #include <vector>
 
-uint32_t count_in_line(const std::vector<std::string> &puzzle,
-                       const std::array<int8_t, 2> dir,
-                       const std::array<size_t, 2> start_pos) {
+static uint32_t count_in_line(const std::vector<std::string> &puzzle,
+                              const std::array<int8_t, 2> dir,
+                              const std::array<size_t, 2> start_pos) {
     const std::string keyword{"XMAS"};
     size_t matched_letters = 0;
     uint32_t matches = 0;
 
-    size_t x = start_pos[0];
-    size_t y = start_pos[1];
+    int64_t x = start_pos[0];
+    int64_t y = start_pos[1];
 
     int8_t dx = dir[0];
     int8_t dy = dir[1];
 
-    while (y >= 0 && y < puzzle.size() && x >= 0 && x < puzzle[0].size()) {
+    while (y >= 0 && y < static_cast<int64_t>(puzzle.size()) && x >= 0 &&
+           x < static_cast<int64_t>(puzzle[0].size())) {
         if (puzzle[y][x] == keyword[matched_letters]) {
             matched_letters++;
             if (matched_letters >= keyword.size()) {
@@ -105,8 +106,8 @@ void aoc_04(std::istream &in, std::string &out1, std::string &out2) {
 
     uint32_t count2 = 0;
 
-    for (size_t y = 1; y < puzzle.size() - 1; y++) {
-        for (size_t x = 1; x < puzzle.size() - 1; x++) {
+    for (int64_t y = 1; y < static_cast<int64_t>(puzzle.size() - 1); y++) {
+        for (int64_t x = 1; x < static_cast<int64_t>(puzzle.size() - 1); x++) {
             if (puzzle[y][x] != 'A') {
                 continue;
             }

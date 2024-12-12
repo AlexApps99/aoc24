@@ -9,7 +9,7 @@
 // it seeks forward to the first char that doesn't match
 // the pattern mul\([0-9]+,[0-9]+\).
 // returns number to be added.
-uint64_t scan_mul(const std::string &input, size_t &i) {
+static uint64_t scan_mul(const std::string &input, size_t &i) {
     size_t next_bad_val = 0;
 
     const std::string preamble{"mul("};

@@ -16,6 +16,7 @@ struct Link {
     bool is_free_space() const { return id == UINT64_MAX; }
 };
 
+[[clang::no_sanitize("unsigned-integer-overflow")]]
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void aoc_09(std::istream &in, std::string &out1, std::string &out2) {
     // grab input

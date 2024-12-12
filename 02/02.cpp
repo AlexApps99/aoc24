@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+[[clang::no_sanitize("unsigned-integer-overflow")]]
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void aoc_02(std::istream &in, std::string &out1, std::string &out2) {
     uint32_t counter_1 = 0;

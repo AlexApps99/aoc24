@@ -19,10 +19,11 @@
 // move to more general format of examples (3 had two different examples, for
 // example)
 
-constexpr std::ios_base::openmode OUT_MODE =
+static constexpr std::ios_base::openmode OUT_MODE =
     std::ios::out | std::ios::trunc | std::ios::binary;
 
-constexpr std::ios_base::openmode IN_MODE = std::ios::in | std::ios::binary;
+static constexpr std::ios_base::openmode IN_MODE =
+    std::ios::in | std::ios::binary;
 
 // see the wikipedia page for X-macros (you will either love it or hate it)
 #ifndef LIST_OF_IMPLS
@@ -39,7 +40,7 @@ LIST_OF_IMPLS
 // typedef of above function signature:
 using aoc_func = void(std::istream &in, std::string &out1, std::string &out2);
 
-std::optional<std::reference_wrapper<aoc_func>>
+static std::optional<std::reference_wrapper<aoc_func>>
 get_aoc_func(const uint64_t day) {
     // create switch-case for all days
 
@@ -65,8 +66,8 @@ get_aoc_func(const uint64_t day) {
 // check if the computed output matches the groundtruth,
 // return EXIT_SUCCESS if it does, EXIT_FAILURE otherwise.
 // if they don't match, print both to stderr.
-int test_part(const std::string &name, const std::string &computed_str,
-              const std::string &groundtruth_str) {
+static int test_part(const std::string &name, const std::string &computed_str,
+                     const std::string &groundtruth_str) {
 
     bool test_passed = computed_str == groundtruth_str ||
                        computed_str + '\n' == groundtruth_str;
@@ -85,8 +86,8 @@ int test_part(const std::string &name, const std::string &computed_str,
     return EXIT_SUCCESS;
 }
 
-int test(const std::string &day_str, aoc_func &func, const std::string &prefix,
-         const bool gen_files) {
+static int test(const std::string &day_str, aoc_func &func,
+                const std::string &prefix, const bool gen_files) {
     // get string of day padded to 2 digits
 
     const std::string path_with_prefix =
@@ -176,7 +177,8 @@ int test(const std::string &day_str, aoc_func &func, const std::string &prefix,
     return EXIT_SUCCESS;
 }
 
-int run(aoc_func &func, std::optional<std::array<std::ofstream, 2>> &outputs) {
+static int run(aoc_func &func,
+               std::optional<std::array<std::ofstream, 2>> &outputs) {
     std::string out1_str;
     std::string out2_str;
     func(std::cin, out1_str, out2_str);

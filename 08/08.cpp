@@ -26,8 +26,8 @@ void aoc_08(std::istream &in, std::string &out1, std::string &out2) {
         return;
     }
 
-    for (int64_t y = 0; y < lines.size(); y++) {
-        for (int64_t x = 0; x < lines[y].size(); x++) {
+    for (int64_t y = 0; y < static_cast<int64_t>(lines.size()); y++) {
+        for (int64_t x = 0; x < static_cast<int64_t>(lines[y].size()); x++) {
             char c = lines[y][x];
             if (c != '.') {
                 // init vec
@@ -40,10 +40,10 @@ void aoc_08(std::istream &in, std::string &out1, std::string &out2) {
     }
 
     for (auto const &[key, pairs] : map) {
-        for (int i = 0; i < pairs.size(); i++) {
+        for (int i = 0; i < static_cast<int64_t>(pairs.size()); i++) {
             int64_t ax = pairs[i].first;
             int64_t ay = pairs[i].second;
-            for (int64_t j = 0; j < pairs.size(); j++) {
+            for (int64_t j = 0; j < static_cast<int64_t>(pairs.size()); j++) {
                 int64_t bx = pairs[j].first;
                 int64_t by = pairs[j].second;
 
@@ -53,8 +53,9 @@ void aoc_08(std::istream &in, std::string &out1, std::string &out2) {
                 for (int64_t m = -100; m < 100; m++) {
                     int64_t newx = ax + m * dx;
                     int64_t newy = ay + m * dy;
-                    if (newx >= 0 && newx < grid[0].size() && newy >= 0 &&
-                        newy < grid.size()) {
+                    if (newx >= 0 &&
+                        newx < static_cast<int64_t>(grid[0].size()) &&
+                        newy >= 0 && newy < static_cast<int64_t>(grid.size())) {
                         if (grid[newy][newx] != 1) {
                             grid[newy][newx] = m;
                         }
@@ -64,8 +65,8 @@ void aoc_08(std::istream &in, std::string &out1, std::string &out2) {
         }
     }
 
-    for (int y = 0; y < grid.size(); y++) {
-        for (int x = 0; x < grid[y].size(); x++) {
+    for (int y = 0; y < static_cast<int64_t>(grid.size()); y++) {
+        for (int x = 0; x < static_cast<int64_t>(grid[y].size()); x++) {
             if (grid[y][x] == 1) {
                 count1++;
             }

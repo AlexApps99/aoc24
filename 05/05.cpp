@@ -7,11 +7,11 @@
 #include <string>
 #include <vector>
 
-void dfs_visit(std::array<bool, 256> &visited,
-               std::array<bool, 256> &in_da_list,
-               const std::array<bool, 256> &should_be_included,
-               const std::array<std::vector<uint8_t>, 256> &adjacency,
-               std::vector<uint8_t> &seq, int n) {
+static void dfs_visit(std::array<bool, 256> &visited,
+                      std::array<bool, 256> &in_da_list,
+                      const std::array<bool, 256> &should_be_included,
+                      const std::array<std::vector<uint8_t>, 256> &adjacency,
+                      std::vector<uint8_t> &seq, int n) {
     if (in_da_list[n] || !should_be_included[n]) {
         return;
     }
@@ -35,8 +35,8 @@ void dfs_visit(std::array<bool, 256> &visited,
 // rev_adjacency: reverse adjacency list
 // seq: sequence of nodes
 // mapping: mapping from node ID to index in seq
-void reorder(const std::array<std::vector<uint8_t>, 256> &adjacency,
-             std::vector<uint8_t> &seq) {
+static void reorder(const std::array<std::vector<uint8_t>, 256> &adjacency,
+                    std::vector<uint8_t> &seq) {
 
     std::array<bool, 256> should_be_included{};
     for (const uint8_t node : seq) {

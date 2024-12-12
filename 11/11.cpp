@@ -6,7 +6,10 @@
 #include <string>
 #include <vector>
 
-inline uint32_t get_num_digits(uint64_t n) {
+static inline uint32_t get_num_digits(uint64_t n) {
+    if (n == 0) {
+        return 1;
+    }
     uint32_t count = 0;
     while (n != 0) {
         n /= 10;
@@ -15,7 +18,7 @@ inline uint32_t get_num_digits(uint64_t n) {
     return count;
 }
 
-inline uint64_t pow10(uint32_t n) {
+static inline uint64_t pow10(uint32_t n) {
     uint64_t result = 1;
     for (uint32_t i = 0; i < n; i++) {
         result *= 10;
@@ -23,7 +26,7 @@ inline uint64_t pow10(uint32_t n) {
     return result;
 }
 
-uint64_t count_stones(uint64_t starting_stone, uint64_t depth) {
+static uint64_t count_stones(uint64_t starting_stone, uint64_t depth) {
     if (depth == 0) {
         return 1;
     }

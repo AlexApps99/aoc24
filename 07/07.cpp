@@ -9,8 +9,20 @@
 #include <string>
 #include <vector>
 
-std::optional<uint64_t> concat(uint64_t a, uint64_t b) {
-    uint64_t digits = static_cast<uint64_t>(std::log10(b != 0 ? b : 1) + 1.0);
+static inline uint32_t get_num_digits(uint64_t n) {
+    if (n == 0) {
+        return 1;
+    }
+    uint32_t count = 0;
+    while (n != 0) {
+        n /= 10;
+        count++;
+    }
+    return count;
+}
+
+static inline std::optional<uint64_t> concat(uint64_t a, uint64_t b) {
+    uint64_t digits = get_num_digits(b);
     uint64_t mul_fac = 1;
     for (uint64_t k = 0; k < digits; k++) {
         mul_fac *= 10;
@@ -29,8 +41,8 @@ std::optional<uint64_t> concat(uint64_t a, uint64_t b) {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
-void handle_eqn(uint64_t goal, const std::vector<uint64_t> &nums,
-                uint64_t &count1, uint64_t &count2) {
+static void handle_eqn(uint64_t goal, const std::vector<uint64_t> &nums,
+                       uint64_t &count1, uint64_t &count2) {
     bool add_to_count1 = false;
     bool add_to_count2 = false;
     for (uint64_t i = 0; i < (1UL << (2 * (nums.size() - 1))); i++) {
