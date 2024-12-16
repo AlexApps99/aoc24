@@ -29,7 +29,7 @@ static void handle_eqn(uint64_t goal, const std::vector<uint64_t> &nums,
     results.clear();
     inputs.clear();
 
-    results.emplace_back(nums[0]);
+    results.emplace_back(static_cast<int64_t>(nums[0]));
 
     for (uint64_t i = 1; i < nums.size(); i++) {
         std::swap(results, inputs);
@@ -39,25 +39,36 @@ static void handle_eqn(uint64_t goal, const std::vector<uint64_t> &nums,
             bool is_part_2_only = input < 0;
             uint64_t abs_input = std::abs(input);
 
-            int64_t mul = abs_input * nums[i];
+            int64_t mul = static_cast<int64_t>(abs_input * nums[i]);
             results.emplace_back(is_part_2_only ? -mul : mul);
 
-            int64_t sum = abs_input + nums[i];
+            int64_t sum = static_cast<int64_t>(abs_input + nums[i]);
             results.emplace_back(is_part_2_only ? -sum : sum);
 
-            int64_t concat_res = concat(abs_input, nums[i]);
+            int64_t concat_res =
+                static_cast<int64_t>(concat(abs_input, nums[i]));
             results.emplace_back(-concat_res);
         }
     }
 
+    int64_t pos_goal = static_cast<int64_t>(goal);
     int64_t neg_goal = -static_cast<int64_t>(goal);
 
-    if (std::find(results.begin(), results.end(), goal) != results.end()) {
-        count1 += goal;
-        count2 += goal;
-    } else if (std::find(results.begin(), results.end(), neg_goal) !=
-               results.end()) {
-        count2 += goal;
+    bool incremented_count2 = false;
+    for (uint32_t i = 0; i < results.size(); i++) {
+        if (results[i] == pos_goal) {
+            count1 += goal;
+            if (!incremented_count2) {
+                count2 += goal;
+                incremented_count2 = true;
+            }
+            break;
+        } else if (results[i] == neg_goal) {
+            if (!incremented_count2) {
+                count2 += goal;
+                incremented_count2 = true;
+            }
+        }
     }
 }
 

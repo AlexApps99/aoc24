@@ -77,10 +77,11 @@ static int test_part(const std::string &name, const std::string &computed_str,
     float millis = static_cast<float>(micros) / 1000.0f;
 
     if (test_passed) {
-        std::cerr << "✅ " << name << " (in " << std::fixed
+        std::cerr << "✅ " << std::left << std::setw(5) << name << " (in "
+                  << std::right << std::setw(7) << std::fixed
                   << std::setprecision(2) << millis << "ms)\n";
     } else {
-        std::cerr << "❌ " << name << " failed.\n"
+        std::cerr << "❌ " << std::left << std::setw(5) << name << " failed.\n"
                   << "Computed:\n"
                   << computed_str << '\n'
                   << "Expected:\n"
