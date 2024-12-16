@@ -1,4 +1,5 @@
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
@@ -67,13 +68,17 @@ get_aoc_func(const uint64_t day) {
 // return EXIT_SUCCESS if it does, EXIT_FAILURE otherwise.
 // if they don't match, print both to stderr.
 static int test_part(const std::string &name, const std::string &computed_str,
-                     const std::string &groundtruth_str) {
+                     const std::string &groundtruth_str,
+                     const uint64_t micros) {
 
     bool test_passed = computed_str == groundtruth_str ||
                        computed_str + '\n' == groundtruth_str;
 
+    float millis = static_cast<float>(micros) / 1000.0f;
+
     if (test_passed) {
-        std::cerr << "✅ " << name << "\n";
+        std::cerr << "✅ " << name << " (in " << std::fixed
+                  << std::setprecision(2) << millis << "ms)\n";
     } else {
         std::cerr << "❌ " << name << " failed.\n"
                   << "Computed:\n"
@@ -106,7 +111,15 @@ static int test(const std::string &day_str, aoc_func &func,
 
     std::string out1_str;
     std::string out2_str;
+    std::chrono::steady_clock::time_point start =
+        std::chrono::steady_clock::now();
     func(in, out1_str, out2_str);
+    std::chrono::steady_clock::time_point end =
+        std::chrono::steady_clock::now();
+
+    const uint64_t micros =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+            .count();
 
     if (gen_files) {
         std::ofstream expected1{expected_output1_file, OUT_MODE};
@@ -162,13 +175,13 @@ static int test(const std::string &day_str, aoc_func &func,
         }
 
         const int ret1 = test_part(day_str + "/1" + shorthand_prefix, out1_str,
-                                   expected1_str);
+                                   expected1_str, micros);
         if (ret1 != EXIT_SUCCESS) {
             return ret1;
         }
 
         const int ret2 = test_part(day_str + "/2" + shorthand_prefix, out2_str,
-                                   expected2_str);
+                                   expected2_str, micros);
         if (ret2 != EXIT_SUCCESS) {
             return ret2;
         }
