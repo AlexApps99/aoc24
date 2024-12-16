@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -9,102 +10,53 @@
 #include <string>
 #include <vector>
 
-static inline uint32_t get_num_digits(uint64_t n) {
-    if (n == 0) {
-        return 1;
+static inline uint64_t concat(uint64_t a, uint64_t b) {
+    if (b != 0) {
+        uint64_t temp_b = b;
+        while (temp_b != 0) {
+            temp_b /= 10;
+            a *= 10;
+        }
     }
-    uint32_t count = 0;
-    while (n != 0) {
-        n /= 10;
-        count++;
-    }
-    return count;
-}
-
-static inline std::optional<uint64_t> concat(uint64_t a, uint64_t b) {
-    uint64_t digits = get_num_digits(b);
-    uint64_t mul_fac = 1;
-    for (uint64_t k = 0; k < digits; k++) {
-        mul_fac *= 10;
-    }
-    uint64_t res = a * mul_fac;
-    if (res / mul_fac != a) {
-        // overflow
-        return std::nullopt;
-    }
-    uint64_t res2 = res + b;
-    if (res2 < res) {
-        // underflow
-        return std::nullopt;
-    }
-    return res2;
+    return a + b;
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 static void handle_eqn(uint64_t goal, const std::vector<uint64_t> &nums,
                        uint64_t &count1, uint64_t &count2) {
-    bool add_to_count1 = false;
-    bool add_to_count2 = false;
-    for (uint64_t i = 0; i < (1UL << (2 * (nums.size() - 1))); i++) {
-        uint64_t sum = nums[0];
-        bool used_funky = false;
-        bool bogus = false;
-        for (size_t j = 1; j < nums.size(); j++) {
-            switch ((i >> (2 * (j - 1))) & 0b11UL) {
-            case 0: {
-                uint64_t res = sum * nums[j];
-                if (nums[j] != 0 && res / nums[j] != sum) {
-                    // overflow
-                    bogus = true;
-                    break;
-                }
-                sum = res;
-                break;
-            }
-            case 1: {
-                uint64_t res = sum + nums[j];
-                if (res < sum) {
-                    // overflow
-                    bogus = true;
-                    break;
-                    break;
-                }
-                sum = res;
-                break;
-            }
-            case 2: {
-                used_funky = true;
-                std::optional<uint64_t> res = concat(sum, nums[j]);
-                if (!res.has_value()) {
-                    bogus = true;
-                    break;
-                }
+    static std::vector<int64_t> results{};
+    static std::vector<int64_t> inputs{};
+    results.clear();
+    inputs.clear();
 
-                sum = res.value();
-                break;
-            }
-            default:
-                bogus = true;
-                break;
-            }
-            if (bogus) {
-                break;
-            }
-        }
-        if (sum == goal && !bogus) {
-            add_to_count2 = true;
-            if (!used_funky) {
-                add_to_count1 = true;
-            }
-            if (add_to_count1 && add_to_count2) {
-                break;
-            }
+    results.emplace_back(nums[0]);
+
+    for (uint64_t i = 1; i < nums.size(); i++) {
+        std::swap(results, inputs);
+        results.clear();
+
+        for (int64_t input : inputs) {
+            bool is_part_2_only = input < 0;
+            uint64_t abs_input = std::abs(input);
+
+            int64_t mul = abs_input * nums[i];
+            results.emplace_back(is_part_2_only ? -mul : mul);
+
+            int64_t sum = abs_input + nums[i];
+            results.emplace_back(is_part_2_only ? -sum : sum);
+
+            int64_t concat_res = concat(abs_input, nums[i]);
+            results.emplace_back(-concat_res);
         }
     }
-    if (add_to_count1) {
+
+    int64_t neg_goal = -static_cast<int64_t>(goal);
+
+    if (std::find(results.begin(), results.end(), goal) != results.end()) {
         count1 += goal;
-    }
-    if (add_to_count2) {
+        count2 += goal;
+    } else if (std::find(results.begin(), results.end(), neg_goal) !=
+               results.end()) {
         count2 += goal;
     }
 }

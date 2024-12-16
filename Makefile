@@ -10,7 +10,7 @@ LIST_OF_IMPLS := ${addsuffix ),$(LIST_OF_IMPLS_PREFIX)}
 
 # flags
 CXX := clang++
-CXXFLAGS := -std=c++20 -O1 -fsanitize=address,undefined,integer,implicit-conversion,nullability -fno-omit-frame-pointer -fvisibility=hidden -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
+CXXFLAGS := -std=c++20 -O2 -fsanitize=address,undefined,integer,implicit-conversion,nullability -fno-omit-frame-pointer -fvisibility=hidden -g -Wall -Wextra -Wpedantic -DLIST_OF_IMPLS="$(LIST_OF_IMPLS)"
 
 # object files
 %.o: %.cpp
